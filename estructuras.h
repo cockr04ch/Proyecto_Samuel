@@ -1,9 +1,9 @@
 #ifndef ESTRUCTURAS_H
 #define ESTRUCTURAS_H
 
-const int MAX_CATEGORIAS = 5;
-const int MAX_HISTORIAL = 5;
-const int MAX_RECOMENDACIONES = 5;
+const int MAX_CATEGORIAS = 100;
+const int MAX_HISTORIAL = 10;
+const int MAX_RECOMENDACIONES = 10;
 
 struct Producto {
   int id;
@@ -14,7 +14,7 @@ struct Producto {
   int categoria;
 };
 
-struct NodoLista {
+struct NodoLista { 
   char dato[50];
   NodoLista *siguiente;
 };

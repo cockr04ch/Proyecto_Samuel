@@ -20,4 +20,6 @@ void menuCatalogo();
 void mostrarCatalogoCompleto();
 void filtrarPorRangoPrecios();
 void filtrarPorCategoria();
+void filtrarPorMarca();
+void filtrarPorDescripcion();
 #endif

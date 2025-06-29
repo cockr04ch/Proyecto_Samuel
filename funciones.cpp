@@ -71,44 +71,95 @@ void agregarProductoACategoria(Producto *p) {
   catalogoPorCategoria[p->categoria] = nuevo;
 }
 
+// Helper struct for sorting recommendations
+struct ProductoPuntuado {
+    Producto* producto;
+    float puntuacion;
+};
+
+// Bubble sort for the array of structs
+void ordenarCandidatos(ProductoPuntuado arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j].puntuacion < arr[j + 1].puntuacion) {
+                ProductoPuntuado temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+        }
+    }
+}
+
 void generarRecomendaciones(Usuario *usuario, Producto *recomendados[]) {
-  int contador = 0;
-  float puntuacionMax = 0;
-  Producto *mejorProducto = nullptr;
+    const int MAX_CANDIDATOS = 200; 
+    ProductoPuntuado candidatos[MAX_CANDIDATOS];
+    int num_candidatos = 0;
 
-  for (int cat = 0; cat < MAX_CATEGORIAS; cat++) {
-    NodoProducto *actual = catalogoPorCategoria[cat];
-    while (actual && contador < MAX_RECOMENDACIONES) {
-      Producto *p = actual->producto;
-      float puntuacion = 0;
+    // Step 1: Iterate through all products and calculate a score for each.
+    for (int cat = 0; cat < MAX_CATEGORIAS; cat++) {
+        NodoProducto *actual = catalogoPorCategoria[cat];
+        while (actual) {
+            Producto *p = actual->producto;
 
-      if (buscarPreferencia(usuario->preferenciasMarcas, p->marca))
-        puntuacion += 0.5;
+            // Skip products already in the user's purchase history
+            bool enHistorial = false;
+            for (int i = 0; i < usuario->historial.contador; i++) {
+                int idx = (usuario->historial.frente + i) % MAX_HISTORIAL;
+                if (usuario->historial.items[idx]->id == p->id) {
+                    enHistorial = true;
+                    break;
+                }
+            }
+            if (enHistorial) {
+                actual = actual->siguiente;
+                continue;
+            }
 
-      for (int i = 0; i < usuario->historial.contador; i++) {
-        int idx = (usuario->historial.frente + i) % MAX_HISTORIAL;
-        Producto *h = usuario->historial.items[idx];
-        if (strcmp(h->marca, p->marca) == 0)
-          puntuacion += 0.3;
-        if (h->categoria == p->categoria)
-          puntuacion += 0.2;
-      }
+            float puntuacion = 0.0f;
+            // Score based on brand preference
+            if (buscarPreferencia(usuario->preferenciasMarcas, p->marca)) {
+                puntuacion += 0.5f;
+            }
 
-      puntuacion += (1 - abs(p->calidad - 3) / 5.0) * 0.2;
+            // Score based on similarity to purchase history
+            for (int i = 0; i < usuario->historial.contador; i++) {
+                int idx = (usuario->historial.frente + i) % MAX_HISTORIAL;
+                Producto *h = usuario->historial.items[idx];
+                if (strcmp(h->marca, p->marca) == 0) {
+                    puntuacion += 0.3f;
+                }
+                if (h->categoria == p->categoria) {
+                    puntuacion += 0.2f;
+                }
+            }
 
-      if (puntuacion > puntuacionMax) {
-        puntuacionMax = puntuacion;
-        mejorProducto = p;
-      }
+            // Score based on quality
+            puntuacion += (1.0f - abs(p->calidad - 3) / 5.0f) * 0.2f;
 
-      actual = actual->siguiente;
+            // Add product to candidates list if it has a positive score
+            if (puntuacion > 0 && num_candidatos < MAX_CANDIDATOS) {
+                candidatos[num_candidatos].producto = p;
+                candidatos[num_candidatos].puntuacion = puntuacion;
+                num_candidatos++;
+            }
+
+            actual = actual->siguiente;
+        }
     }
 
-    if (mejorProducto) {
-      recomendados[contador++] = mejorProducto;
-      puntuacionMax = 0;
+    // Step 2: Sort candidates in descending order of score (Bubble Sort)
+    ordenarCandidatos(candidatos, num_candidatos);
+
+    // Step 3: Fill the recommendations array with the top products
+    int contador = 0;
+    for (int i = 0; i < num_candidatos && contador < MAX_RECOMENDACIONES; ++i) {
+        recomendados[contador++] = candidatos[i].producto;
     }
-  }
+
+    // Step 4: Fill the rest of the array with nullptrs
+    for (int i = contador; i < MAX_RECOMENDACIONES; i++) {
+        recomendados[i] = nullptr;
+    }
 }
 
 void mostrarProducto(Producto *p) {
@@ -184,7 +235,9 @@ void menuCatalogo() {
     cout << "1. Mostrar todo el catálogo\n";
     cout << "2. Filtrar por rango de precios\n";
     cout << "3. Filtrar por categoría\n";
-    cout << "4. Volver al menú principal\n";
+    cout << "4. Filtrar por marca\n";
+    cout << "5. Filtrar por descripción\n";
+    cout << "6. Volver al menú principal\n";
     cout << "Seleccione: ";
     cin >> opcion;
 
@@ -198,8 +251,14 @@ void menuCatalogo() {
     case 3:
       filtrarPorCategoria();
       break;
+    case 4:
+      filtrarPorMarca();
+      break;
+    case 5:
+      filtrarPorDescripcion();
+      break;
     }
-  } while (opcion != 4);
+  } while (opcion != 6);
 }
 
 // Función para mostrar todo el catálogo
@@ -264,4 +323,44 @@ void filtrarPorCategoria() {
     mostrarProducto(actual->producto);
     actual = actual->siguiente;
   }
+}
+
+// Función para filtrar por marca
+void filtrarPorMarca() {
+    char marca[50];
+    cout << "\nFILTRAR POR MARCA\n";
+    cout << "Ingrese la marca: ";
+    cin >> marca;
+
+    cout << "\nPRODUCTOS DE LA MARCA " << marca << ":\n";
+    for (int i = 0; i < MAX_CATEGORIAS; i++) {
+        NodoProducto *actual = catalogoPorCategoria[i];
+        while (actual) {
+            Producto *p = actual->producto;
+            if (strcmp(p->marca, marca) == 0) {
+                mostrarProducto(p);
+            }
+            actual = actual->siguiente;
+        }
+    }
+}
+
+// Función para filtrar por descripción
+void filtrarPorDescripcion() {
+    char descripcion[100];
+    cout << "\nFILTRAR POR DESCRIPCIÓN\n";
+    cout << "Ingrese una palabra de la descripción: ";
+    cin >> descripcion;
+
+    cout << "\nPRODUCTOS CON LA DESCRIPCIÓN QUE CONTIENE '" << descripcion << "':\n";
+    for (int i = 0; i < MAX_CATEGORIAS; i++) {
+        NodoProducto *actual = catalogoPorCategoria[i];
+        while (actual) {
+            Producto *p = actual->producto;
+            if (strstr(p->descripcion, descripcion) != nullptr) {
+                mostrarProducto(p);
+            }
+            actual = actual->siguiente;
+        }
+    }
 }
