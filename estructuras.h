@@ -26,6 +26,8 @@ struct Historial {
   int contador;
 };
 
+enum RolUsuario { CLIENTE, ADMIN };
+
 struct Usuario {
   char nombre[50];
   char apellido[50];
@@ -34,6 +36,7 @@ struct Usuario {
   char password[30];
   NodoLista *preferenciasMarcas;
   Historial historial;
+  RolUsuario rol;
 };
 
 struct NodoUsuario {

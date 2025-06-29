@@ -133,6 +133,7 @@ void inicializarDatos() {
   u1->id = 1001;
   strcpy(u1->username, "ana_user");
   strcpy(u1->password, "pass123");
+  u1->rol = CLIENTE;
   inicializarHistorial(u1->historial);
   agregarPreferencia(u1->preferenciasMarcas, "TechMax");
   agregarPreferencia(u1->preferenciasMarcas, "HomeGoods");
@@ -149,6 +150,7 @@ void inicializarDatos() {
   u2->id = 1002;
   strcpy(u2->username, "carlos_m");
   strcpy(u2->password, "pass456");
+  u2->rol = CLIENTE;
   inicializarHistorial(u2->historial);
   agregarPreferencia(u2->preferenciasMarcas, "SportLife");
   agregarAlHistorial(u2->historial, p4);
@@ -163,6 +165,7 @@ void inicializarDatos() {
   u3->id = 1003;
   strcpy(u3->username, "daniel");
   strcpy(u3->password, "daniel");
+  u3->rol = CLIENTE;
   inicializarHistorial(u3->historial);
   agregarPreferencia(u3->preferenciasMarcas, "SportLife");
   agregarAlHistorial(u3->historial, p37);
@@ -175,6 +178,7 @@ void inicializarDatos() {
   u4->id = 1004;
   strcpy(u4->username, "laura_s");
   strcpy(u4->password, "password4");
+  u4->rol = CLIENTE;
   inicializarHistorial(u4->historial);
   agregarPreferencia(u4->preferenciasMarcas, "BeautyCare");
   agregarPreferencia(u4->preferenciasMarcas, "FloralChic");
@@ -189,6 +193,7 @@ void inicializarDatos() {
   u5->id = 1005;
   strcpy(u5->username, "pedro_g");
   strcpy(u5->password, "password5");
+  u5->rol = CLIENTE;
   inicializarHistorial(u5->historial);
   agregarPreferencia(u5->preferenciasMarcas, "KitchenPro");
   agregarPreferencia(u5->preferenciasMarcas, "ViewSonic");
@@ -198,7 +203,19 @@ void inicializarDatos() {
   agregarAlHistorial(u5->historial, p11);
 
 
+  //Crear usuario admin
+  Usuario *admin = new Usuario();
+  strcpy(admin->nombre, "Admin");
+  strcpy(admin->apellido, "User");
+  admin->id = 0;
+  strcpy(admin->username, "admin");
+  strcpy(admin->password, "admin");
+  admin->rol = ADMIN;
+  inicializarHistorial(admin->historial);
+
+
   // Insertar usuarios en el árbol
+  insertarUsuario(arbolUsuarios, admin);
   insertarUsuario(arbolUsuarios, u1);
   insertarUsuario(arbolUsuarios, u2);
   insertarUsuario(arbolUsuarios, u3);

@@ -15,6 +15,11 @@ void generarRecomendaciones(Usuario *usuario, Producto *recomendados[]);
 void mostrarProducto(Producto *p);
 void mostrarMenu();
 void menuUsuario(Usuario *usuario);
+
+// Nuevas funciones para el historial
+void marcarProductoDeInteres(Usuario *usuario);
+Producto *buscarProductoPorId(int id);
+
 // Nuevas funciones para filtrado
 void menuCatalogo();
 void mostrarCatalogoCompleto();
@@ -22,4 +27,10 @@ void filtrarPorRangoPrecios();
 void filtrarPorCategoria();
 void filtrarPorMarca();
 void filtrarPorDescripcion();
+
+// Admin functions
+void agregarNuevoUsuario();
+void agregarNuevoProducto();
+void menuAdmin(Usuario *usuario);
+
 #endif

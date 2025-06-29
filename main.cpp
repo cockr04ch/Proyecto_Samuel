@@ -26,7 +26,11 @@ int main() {
         cin >> password;
 
         if (strcmp(usuarioActual->password, password) == 0) {
-          menuUsuario(usuarioActual);
+          if (usuarioActual->rol == ADMIN) {
+            menuAdmin(usuarioActual);
+          } else {
+            menuUsuario(usuarioActual);
+          }
         } else {
           cout << "Contraseña incorrecta!\n";
         }
