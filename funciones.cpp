@@ -434,6 +434,11 @@ void agregarNuevoUsuario() {
   cout << "\n--- AGREGAR NUEVO USUARIO ---\n";
   cout << "ID: ";
   cin >> nuevoUsuario->id;
+  if (buscarUsuario(arbolUsuarios, nuevoUsuario->id)) {
+    cout << "Error: El ID de usuario ya existe.\n";
+    delete nuevoUsuario;
+    return;
+  }
   cout << "Nombre: ";
   cin >> nuevoUsuario->nombre;
   cout << "Apellido: ";
